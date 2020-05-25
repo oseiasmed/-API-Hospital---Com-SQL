@@ -1,108 +1,126 @@
 const express = require("express");
+const mysql = require("../mysql");
 
-const Paciente = require("../models/Paciente");
-
-// Criar pacientes
+//Creating patients
 
 exports.store = (req, res, next) => {
 
-    var { nome, cpf, endereco, numero, dtnascimento, complemento, bairro, cidade, uf } = req.body;
+    try {
 
-    Paciente.create({
+        const query = 'INSERT INTO pacientes (nome, cpf, endereco, numero, dtnascimento, complemento, bairro, cidade, uf,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
 
-        nome, cpf, endereco, numero, dtnascimento, complemento, bairro, cidade, uf
+        const result = mysql.execute(query, [
 
-    }).then(() => {
+            req.body.nome, req.body.cpf, req.body.endereco, req.body.numero,
+            req.body.dtnascimento, req.body.complemento, req.body.bairro, req.body.cidade,
+            req.body.uf, req.body.createdAt, req.body.updatedAt
+        ]);
 
-        res.status(200).send('Paciente criado com sucesso');
+        const response = {
+            mensagem: 'Paciente inserido com sucesso'
 
-    }).catch(error => {
-
-        res.status(400).send('Erro ao criar o paciente');
-
-    });
-};
-
-// Listar pacientes
-
-exports.index = (req, res, next) => {
-
-    Paciente.findAll().then(pacientes => {
-
-        res.status(200).send(pacientes);
-
-    }).catch(error => {
-
-        res.status(400).send('Erro ao listar os pacientes');
-
-    });
-};
-
-// Editar pacientes
-
-exports.update = (req, res) => {
-
-    var id = req.params.id;
-
-    var { nome, cpf, endereco, numero, dtnascimento, complemento, bairro, cidade, uf } = req.body;
-
-    Paciente.update({
-
-        nome, cpf, endereco, numero, dtnascimento, complemento, bairro, cidade, uf
-
-    }, {
-
-        where: {
-
-            id: id
         }
 
-    }).then(() => {
+        return res.status(201).send(response);
 
-        res.status("200").send("Paciente editado com sucesso");
+    } catch (error) {
 
-    }).catch(error => {
-
-        res.status(400).send("Erro ao editar paciente " + error);
-
-    });
+        return res.status(500).send({ error: error });
+    }
 };
 
-// Deletar pacientes
+// Listing patients
 
-exports.delete = (req, res, next) => {
+exports.index = async (req, res, next) => {
 
-    var id = req.body.id;
+    try {
 
-    if (id != undefined) {
+        const result = await mysql.execute('SELECT * FROM pacientes');
 
-        if (!isNaN(id)) {
+        return res.status(200).send(result);
 
-            Paciente.destroy({
 
-                where: {
+    } catch (error) {
 
-                    id: id
-                }
+        return res.status(500).send("Erro ao tentar listar os pacientes");
+    }
+}
 
-            }).then(() => {
+//Editing patients
 
-                res.status(200);
-                res.send("Paciente removido com sucesso.");
-            });
+exports.update = async (req, res, next) => {
 
-        } else {
+    try {
+        const query = ` UPDATE pacientes
+                        SET    nome          = ?,
+                               cpf           = ?,
+                               endereco      = ?,
+                               numero        = ?,
+                               dtnascimento  = ?,
+                               complemento   = ?,
+                               bairro        = ?,
+                               cidade        = ?,
+                               uf            = ?
+                        WHERE id = ?`;
 
-            res.status(400);
+        await mysql.execute(query, [
+            req.body.nome,
+            req.body.cpf,
+            req.body.endereco,
+            req.body.numero,
+            req.body.dtnascimento,
+            req.body.complemento,
+            req.body.bairro,
+            req.body.cidade,
+            req.body.uf,
+            req.body.id
+        ]);
+        const response = {
+            mensagem: 'Paciente atualizado com sucesso',
+            Pacientes: {
+
+                nome: req.body.nome,
+                cpf: req.body.cpf,
+                endereço: req.body.endereco,
+                número: req.body.numero,
+                nascimento: req.body.dtnascimento,
+                complemento: req.body.complemento,
+                bairro: req.body.bairro,
+                cidade: req.body.cidade,
+                uf: req.body.uf,
+                id:req.body.id
+
+            }
         }
 
-    } else {
+        return res.status(202).send(response);
 
-        res.status(400);
-    };
+    } catch (error) {
+
+        return res.status(500).send({ error: error });
+    }
 };
 
+// Deleting patients
 
+exports.delete = async (req, res, next) => {
 
+    try {
 
+        const query = `DELETE FROM pacientes WHERE id = ?`;
 
+        await mysql.execute(query, [req.body.id]);
+
+        const response = {
+
+            mensagem: 'Paciente removido com sucesso',
+        }
+
+        return res.status(202).send(response);
+
+    } catch (error) {
+
+        return res.status(500).send({ error: error });
+
+    }
+};

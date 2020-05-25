@@ -1,17 +1,17 @@
-const express = require("express");
+/* const express = require("express");
 const router = express.Router();
-const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const mysql = require("../mysql");
 
 const JWTSecret = "@Ty&93**$¨%@rtsh*&(NF)5$@*0";
 
 router.post("/authenticate", (req, res) => {
 
-    var email = req.body.email;
+    var user = req.body.user;
     var password = req.body.password;
 
-    User.findOne({ where: { email: email } }).then(user => {
+    const result = mysql.execute('SELECT * FROM users WHERE id=id');
 
         if (user != undefined) {
 
@@ -34,7 +34,7 @@ router.post("/authenticate", (req, res) => {
 
                     } else {
 
-                        res.status(200);
+                        res.status(200).send(result);
                         res.json({ token: token });
 
                     };
@@ -53,6 +53,4 @@ router.post("/authenticate", (req, res) => {
         };
     });
 
-});
-
-module.exports = router;
+module.exports = router; */

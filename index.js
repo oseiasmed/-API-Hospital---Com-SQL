@@ -1,41 +1,24 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const connection = require("./database/database");
+const mysql = require("./mysql");
 
 // Routes
-const pacientesRouter = require("./routes/pacientesRoutes");
-const consultasRouter = require("./routes/consultasRouter");
-const hospitaisRouter = require("./routes/hospitaisRouter");
 
-//Cors
-const cors = require("cors");
-app.use(cors());
+const pacientesRouter = require("./routes/pacientesRoutes");
+const hospitaisRouter = require("./routes/hospitaisRouter");
+const consultasRouter = require("./routes/consultasRouter");
 
 //Body parser
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Using Routes
+
 app.use("/", pacientesRouter);
-app.use("/", consultasRouter);
 app.use("/", hospitaisRouter);
-
-
-// Database Authentication
-connection
-
-    .authenticate()
-
-    .then(() => {
-
-        console.log("Conexão feita com sucesso!");
-
-    }).catch((error) => {
-
-        console.log(error);
-
-    })
+app.use("/", consultasRouter);
 
 app.listen(3000, () => {
 
@@ -43,5 +26,4 @@ app.listen(3000, () => {
 
 });
 
-module.exports = app;
 

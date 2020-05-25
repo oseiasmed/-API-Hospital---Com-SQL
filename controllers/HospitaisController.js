@@ -1,106 +1,133 @@
 const express = require("express");
-const Hospital = require("../models/Hospital");
+const mysql = require("../mysql");
 
-// Criar Hospitais
+//Creating hospitals
 
 exports.store = (req, res, next) => {
 
-    var { nome, cnpj, endereco, numero, cep, complemento, bairro, cidade, uf } = req.body;
+    try {
 
-    Hospital.create({
+        const query = 'INSERT INTO hospitals (nome, cep, endereco, numero, cnpj,complemento, bairro, cidade, uf,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
 
-        nome, cnpj, endereco, numero, cep, complemento, bairro, cidade, uf
+        const result = mysql.execute(query, [
 
-    }).then(() => {
+            req.body.nome, req.body.cep, req.body.endereco,
+            req.body.numero, req.body.cnpj, req.body.complemento,
+            req.body.bairro, req.body.cidade, req.body.uf,
+            req.bodycreatedAt, req.body.updatedAt
 
-        res.status(200).send('Hospital criado com sucesso');
+        ]);
 
-    }).catch(error => {
+        const response = {
+            mensagem: 'Hospital inserido com sucesso'
 
-        res.status(400).send('Erro ao criar o hospital');
-
-    });
-};
-
-// Listar hospitais
-
-exports.index = (req, res, next) => {
-
-    Hospital.findAll().then(hospitais => {
-
-        res.status(200).send(hospitais);
-
-    }).catch(error => {
-
-        res.status(400).send('Erro ao listar os hospitais');
-
-    });
-};
-
-// Editar hospitais
-
-exports.update = (req, res) => {
-
-    var id = req.params.id;
-    var { nome, cnpj, endereco, numero, cep, complemento, bairro, cidade, uf } = req.body;
-
-    Hospital.update({
-
-        nome, cnpj, endereco, numero, cep, complemento, bairro, cidade, uf
-
-    }, {
-
-        where: {
-
-            id: id
         }
 
-    }).then(() => {
+        return res.status(201).send(response);
 
-        res.status("200").send("Hospital editado com sucesso");
+    } catch (error) {
 
-    }).catch(error => {
-
-        res.status(400).send("Erro ao editar hospital " + error);
-
-    });
+        return res.status(500).send({ error: error });
+    }
 };
 
-// Deletar hospitais
+// Listing hospitals
 
-exports.delete = (req, res, next) => {
+exports.index = async (req, res, next) => {
 
-    var id = req.body.id;
+    try {
 
-    if (id != undefined) {
+        const result = await mysql.execute('SELECT * FROM hospitals');
 
-        if (!isNaN(id)) {
+        return res.status(200).send(result);
 
-            Hospital.destroy({
+    } catch (error) {
 
-                where: {
+        return res.status(500).send("Erro ao tentar listar os hospitais");
+    }
+}
 
-                    id: id
-                }
+//Editing hospitals
 
-            }).then(() => {
+exports.update = async (req, res, next) => {
 
-                res.status(200);
-                res.send("Hospital removido com sucesso.");
-            });
+    try {
 
-        } else {
+        const query = ` UPDATE hospitals
+                        SET    nome           = ?,
+                               cep            = ?,
+                               endereco       = ?,
+                               numero         = ?,
+                               cnpj           = ?,
+                               complemento    = ?,
+                               bairro         = ?,
+                               cidade         = ?,
+                               uf             = ?
+                        WHERE  id  = ?`;
 
-            res.status(400);
+        await mysql.execute(query, [
+
+            req.body.nome,
+            req.body.cep,
+            req.body.endereco,
+            req.body.numero,
+            req.body.cnpj,
+            req.body.complemento,
+            req.body.bairro,
+            req.body.cidade,
+            req.body.uf,
+            req.body.id
+
+
+        ]);
+
+        const response = {
+            mensagem: 'Hosital atualizado com sucesso',
+            Hospital: {
+
+                nome: req.body.nome,
+                cep: req.body.cep,
+                endereço: req.body.endereco,
+                número: req.body.numero,
+                cnpj: req.body.cnpj,
+                complemento: req.body.complemento,
+                bairro: req.body.bairro,
+                cidade: req.body.cidade,
+                uf: req.body.uf,
+                id: req.body.id
+
+            }
         }
 
-    } else {
+        return res.status(202).send(response);
 
-        res.status(400);
+    } catch (error) {
+
+        return res.status(500).send({ error: error });
     }
 };
 
 
+// Deleting hospitals
 
+exports.delete = async (req, res, next) => {
 
+    try {
 
+        const query = `DELETE FROM hospitals WHERE id = ?`;
+
+        await mysql.execute(query, [req.body.id]);
+
+        const response = {
+
+            mensagem: 'Hospital removido com sucesso',
+        }
+
+        return res.status(202).send(response);
+
+    } catch (error) {
+
+        return res.status(500).send({ error: error });
+
+    }
+};
