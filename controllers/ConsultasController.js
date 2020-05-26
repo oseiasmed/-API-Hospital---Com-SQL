@@ -1,5 +1,4 @@
-const express = require("express");
-const mysql = require("../mysql");
+const mysql = require("../database/mysql");
 
 //Creating consultations
 

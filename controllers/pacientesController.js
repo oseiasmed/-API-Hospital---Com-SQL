@@ -1,5 +1,4 @@
-const express = require("express");
-const mysql = require("../mysql");
+const mysql = require("../database/mysql");
 
 //Creating patients
 
@@ -88,7 +87,7 @@ exports.update = async (req, res, next) => {
                 bairro: req.body.bairro,
                 cidade: req.body.cidade,
                 uf: req.body.uf,
-                id:req.body.id
+                id: req.body.id
 
             }
         }
@@ -121,6 +120,5 @@ exports.delete = async (req, res, next) => {
     } catch (error) {
 
         return res.status(500).send({ error: error });
-
     }
 };

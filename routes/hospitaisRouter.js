@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const mysql = require("../mysql").pool;
-const authenticate = require("../middlewares/adminauth");
+const login = require("../middlewares/login");
 const HospitaisController = require("../controllers/HospitaisController");
 
-router.get("/hospitais", authenticate, HospitaisController.index);
-router.post("/hospitais", authenticate, HospitaisController.store);
-router.put("/hospitais", authenticate, HospitaisController.update);
-router.delete("/hospitais", authenticate, HospitaisController.delete);
+router.get("/hospitais", login.mandatory, HospitaisController.index);
+router.post("/hospitais", login.mandatory, HospitaisController.store);
+router.put("/hospitais", login.mandatory, HospitaisController.update);
+router.delete("/hospitais", login.mandatory, HospitaisController.delete);
 
 module.exports = router;
+
+
