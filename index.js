@@ -1,13 +1,8 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const morgan = require("morgan");
 
-// Routes
-
-const pacientesRouter = require("./routes/pacientesRouter");
-const hospitaisRouter = require("./routes/hospitaisRouter");
-const consultasRouter = require("./routes/consultasRouter");
-const userRouter = require("./routes/usersRouter");
 
 // Headers
 
@@ -25,19 +20,42 @@ app.use((req, res, next) => {
     next();
 });
 
-//Body parser
+// Routes
 
+const pacientesRouter = require("./routes/pacientesRouter");
+const hospitaisRouter = require("./routes/hospitaisRouter");
+const consultasRouter = require("./routes/consultasRouter");
+const userRouter = require("./routes/usersRouter");
+
+//Body parser 
+
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Using Routes
 
- app.use("/", pacientesRouter);
- app.use("/", hospitaisRouter);
- app.use("/", consultasRouter);
- app.use("/", userRouter);
+app.use("/", pacientesRouter);
+app.use("/", hospitaisRouter);
+app.use("/", consultasRouter);
+app.use("/", userRouter);
 
- app.listen(3000, () => {
+app.use((req, res, next) => {
+    const erro = new Error('Rota não encontrada');
+    erro.status = 404;
+    next(erro);
+});
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500);
+    return res.send({
+        erro: {
+            mensagem: error.message
+        }
+    });
+});
+
+app.listen(3000, () => {
 
     console.log("O servidor está rodando!");
 
